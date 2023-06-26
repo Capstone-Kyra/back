@@ -91,7 +91,7 @@ async function buildDatabase (){
         // console.log(thirdNewTrip)
 
         const allTrips= await fetchAllTrips();
-        // console.log (allTrips)
+        console.log (allTrips)
 
         const findSpecificTrip = await fetchTripById(1);
         console.log(findSpecificTrip)
