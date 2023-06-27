@@ -62,6 +62,41 @@ async function fetchAllTrips (){
     }
 }
 
+async function updateTripById(tripID, {location, type, description}){
+    try{
+     const { rows } = await client.query(`
+     UPDATE trips
+     SET location = $1, type = $2, description = $3
+     WHERE 'tripID' = $4
+     RETURNING *;
+     ` [location, type, description])
+
+     if(rows.length){
+        return rows[0];
+     }
+    }catch(error){
+        console.error(error)
+    }
+}
+
+async function deleteTripById(tripId){
+    try{
+        const { rows } = await client.query(`
+        DELETE FROM trips
+        WHERE 'tripID' = $1
+        RETURNING *;
+        `, [tripId])
+
+        if(rows.length){
+            return rows[0]
+        }else{
+            return 'failed to delete trip'
+        }
+    }catch(error){
+        console.error(error)
+    }
+}
+
 async function buildDatabase (){
     try {
         client.connect ();
