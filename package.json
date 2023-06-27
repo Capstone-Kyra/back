@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    
     "seed": "nodemon db/seed.js",
-    "dev": "nodemon db/server.js"
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
