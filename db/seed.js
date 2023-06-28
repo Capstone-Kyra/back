@@ -1,15 +1,37 @@
 const client= require ("./index");
+const { createReview } = require("./reviews");
+const { createUser, getAllUsers } = require("./users");
 
 async function createTables (){
     try{
+        console.log('creating tables')
         await client.query(`
             CREATE TABLE trips1(
-                "tripId" SERIAL PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 location VARCHAR (255) NOT NULL,
                 type VARCHAR (255) NOT NULL,
                 description TEXT
-            );
-        `)
+            );`);
+
+            await client.query(`
+            CREATE TABLE users (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            email VARCHAR(255) UNIQUE NOT NULL,
+            is_admin BOOLEAN DEFAULT false
+            );`);
+
+            await client.query(`
+            CREATE TABLE reviews (
+              id SERIAL PRIMARY KEY,
+              content VARCHAR(255) NOT NULL,
+              score INTEGER NOT NULL,
+              user_id INTEGER REFERENCES users(id),
+              trips_id INTEGER REFERENCES trips1(id)
+      
+      );`);
+      console.log('finishing tables')
     } catch (error){
         console.log(error);
     }
@@ -18,6 +40,9 @@ async function createTables (){
 async function destroyTables (){
     try{
         await client.query (`
+            
+            DROP TABLE IF EXISTS reviews;
+            DROP TABLE IF EXISTS users;
             DROP TABLE IF EXISTS trips1;
         `)
     } catch (error){
@@ -38,11 +63,45 @@ async function createNewTrip (newTripObj){
         console.log(error);
     }
 }
+
+async function createInitialUsers() {
+    try {
+      console.log("Starting to create Users");
+  
+      await createUser("1", "12345678", "testUser1@gmail.com", false);
+      await createUser("testUser2", "12345678", "testUser2@gmail.com", false);
+      await createUser("testAdmin1", "12345678", "testAdmin1@gmail.com", true);
+  
+      const allUsers = await getAllUsers();
+      console.log("allUsers: ", allUsers);
+      console.log("Finished creating Users");
+    } catch (error) {
+      throw error;
+    }
+  }
+
+async function createInitialReviews() {
+    try {
+      console.log("Starting to create Reviews");
+  
+      const review1 = await createReview("this is great!!!", 10, 1, 3);
+      const review2 = await createReview("this is terrible!!!", 10, 1, 2);
+  
+      console.log(review1);
+      console.log(review2);
+  
+      console.log("Finished creating Reviews");
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
 async function fetchTripById(idValue) {
     try {
         const { rows } = await client.query(`
             SELECT * FROM trips1
-            WHERE "tripId" = ${idValue};
+            WHERE id = ${idValue};
         `)
 
         return rows[0];
@@ -130,17 +189,20 @@ async function buildDatabase (){
 
         const findSpecificTrip = await fetchTripById(1);
         console.log(findSpecificTrip)
-
+        await createInitialUsers();
+        await createInitialReviews();
         client.end ();
     } catch (error){
         console.log(error);
     }
 }
 
-// buildDatabase ();
+buildDatabase ();
 
 module.exports={
     fetchAllTrips,
     fetchTripById,
-    createNewTrip
+    createNewTrip,
+    createInitialReviews,
+    createInitialReviews
 }
