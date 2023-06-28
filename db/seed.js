@@ -185,7 +185,7 @@ async function buildDatabase (){
         // console.log(thirdNewTrip)
 
         const allTrips= await fetchAllTrips();
-        console.log (allTrips)
+        console.log ('all trips:' , allTrips)
 
         const findSpecificTrip = await fetchTripById(1);
         console.log(findSpecificTrip)
@@ -197,7 +197,7 @@ async function buildDatabase (){
     }
 }
 
-buildDatabase ();
+// buildDatabase ();
 
 module.exports={
     fetchAllTrips,
