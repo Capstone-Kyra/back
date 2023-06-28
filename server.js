@@ -2,6 +2,10 @@ const express= require ("express");
 
 const app= express ();
 
+const cors = require("cors");
+app.use(cors());
+
+
 function myFirstMiddleware(req, res, next) {
   console.log("We have received a request")
   console.log("Now we will respond")
