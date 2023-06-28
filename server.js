@@ -11,6 +11,8 @@ app.use(myFirstMiddleware)
 
 app.use(express.json());
 
+
+
 // async function checkIfTokenExists(req, res, next) {
 //       try {
 //           console.log(req.headers)
