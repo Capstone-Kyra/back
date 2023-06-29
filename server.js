@@ -1,3 +1,7 @@
+require ("dotenv").config ();
+
+const jwt= require ("jsonwebtoken");
+
 const express= require ("express");
 
 const app= express ();
@@ -32,7 +36,7 @@ app.use(express.json());
 //   }
 //   app.use(checkIfTokenExists)
 
-const { fetchAllTrips, fetchTripById, createNewTrip } =  require("./db/seed");
+const { fetchAllTrips, fetchTripById, createNewTrip, createNewUser, fetchUserByUsername } =  require("./db/seed");
 
 async function getAllTrips(req, res, next){
   try{
@@ -98,7 +102,60 @@ async function postNewTrip(req, res, next){
     }
 }
 
-app.post("/api/trips", postNewTrip)
+async function postNewTrip (req, res){
+    try{
+        const myAuthToken= req.headers.authorization.slice (7);
+        console.log("my actual token", myAuthToken)
+
+        const isThisTokenLegit= jwt.verify (myAuthToken, process.env.JWT_SECRET)
+        console.log ("This is my decrypted token:")
+        console.log(isThisTokenLegit)
+
+        if (isThisTokenLegit){
+            const userFromDb= await fetchUserByUsername (isThisTokenLegit.username)
+
+            if (userFromDb){
+                const newTripImTaking= await createNewTrip(req.body)
+                res.send(newTripImTaking)
+            }else{
+                res.send({error: true, message: "User does not exist in database. Please register for a new account or try again."})
+            }
+        } else{
+            res.send({error: true, message: "Failed to decrypt token"})
+        }
+    } catch (error){
+        console.log (error)
+    }
+}
+app.post("/trips1", postNewTrip)
+
+async function registerNewUser(req, res){
+    try{
+        const newUserData= req.body
+        const mySecret= process.env.JWT_SECRET;
+        console.log(req.body)
+
+        const newJWTToken= await jwt.sign(req.body, process.env.JWT_SECRET, {
+            expiresIn: "1w"
+        })
+
+        if (newJWTToken){
+            const newUserForDb= await createNewUser (req.body);
+
+            if (newUserForDb){
+                res.send({userData: newUserForDb, token: newJWTToken}).status (200)
+            } else {
+                res.send({error: true, message: "Failed to create user"}).status (403)
+            }
+        } else{
+            res.send({error: true, message: "Failed to create valid auth token"})
+        }
+    } catch (error){
+        console.log (error);
+    }
+}
+
+app.post("/api/users/register", registerNewUser)
 
 const client= require ("./db/index")
 client.connect ();

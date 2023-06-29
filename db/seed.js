@@ -16,7 +16,7 @@ async function createTables (){
             await client.query(`
             CREATE TABLE users (
             id SERIAL PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
+            username VARCHAR(255) UNIQUE NOT NULL,
             password VARCHAR(255) NOT NULL,
             email VARCHAR(255) UNIQUE NOT NULL,
             is_admin BOOLEAN DEFAULT false
@@ -79,6 +79,36 @@ async function createInitialUsers() {
       throw error;
     }
   }
+  async function createNewUser(userObj) {
+    try {
+        const { rows } = await client.query(`
+            INSERT INTO users(username, password, email, is_Admin)
+            VALUES ($1, $2, $3, $4)
+            RETURNING username, email, is_Admin; 
+        `, [userObj.username, userObj.password, userObj.email, userObj.is_Admin])
+
+        if (rows.length) {
+            return rows[0];
+        }
+    } catch (error) {
+        console.log(error); 
+    }
+};
+
+async function fetchUserByUsername(username) {
+    try {
+        const { rows } = await client.query(`
+            SELECT * FROM users
+            WHERE username = $1;
+        `, [username])
+
+        if (rows.length) {
+            return rows[0]; 
+        }
+    } catch (error) {
+        console.log(error); 
+    }
+}
 
 async function createInitialReviews() {
     try {
