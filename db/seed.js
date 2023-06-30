@@ -12,6 +12,7 @@ async function createTables (){
                 type VARCHAR (255) NOT NULL,
                 description TEXT
             );`);
+            console.log("Hey just finished making this trips table")
 
             await client.query(`
             CREATE TABLE users (
@@ -19,8 +20,9 @@ async function createTables (){
             username VARCHAR(255) UNIQUE NOT NULL,
             password VARCHAR(255) NOT NULL,
             email VARCHAR(255) UNIQUE NOT NULL,
-            is_admin BOOLEAN DEFAULT false
+            "is_Admin" BOOLEAN DEFAULT false
             );`);
+            console.log("Hey just finished making this users table")
 
             await client.query(`
             CREATE TABLE reviews (
@@ -31,6 +33,7 @@ async function createTables (){
               trips_id INTEGER REFERENCES trips1(id)
       
       );`);
+      console.log("Hey just finished making this reviews table")
       console.log('finishing tables')
     } catch (error){
         console.log(error);
@@ -68,9 +71,9 @@ async function createInitialUsers() {
     try {
       console.log("Starting to create Users");
   
-      await createUser("1", "12345678", "testUser1@gmail.com", false);
-      await createUser("testUser2", "12345678", "testUser2@gmail.com", false);
-      await createUser("testAdmin1", "12345678", "testAdmin1@gmail.com", true);
+      await createNewUser("1", "12345678", "testUser1@gmail.com", false);
+      await createNewUser("testUser2", "12345678", "testUser2@gmail.com", false);
+      await createNewUser("testAdmin1", "12345678", "testAdmin1@gmail.com", true);
   
       const allUsers = await getAllUsers();
       console.log("allUsers: ", allUsers);
@@ -81,13 +84,15 @@ async function createInitialUsers() {
   }
   async function createNewUser(userObj) {
     try {
+        console.log("I hope this works")
         const { rows } = await client.query(`
-            INSERT INTO users(username, password, email, is_Admin)
+            INSERT INTO users(username, password, email, "is_Admin")
             VALUES ($1, $2, $3, $4)
-            RETURNING username, email, is_Admin; 
+            RETURNING username, email, "is_Admin"; 
         `, [userObj.username, userObj.password, userObj.email, userObj.is_Admin])
-
+        console.log("me too")
         if (rows.length) {
+            console.log ("I am tired")
             return rows[0];
         }
     } catch (error) {
@@ -219,7 +224,9 @@ async function buildDatabase (){
 
         const findSpecificTrip = await fetchTripById(1);
         console.log(findSpecificTrip)
+        console.log("hi")
         await createInitialUsers();
+        console.log("hiiii")
         await createInitialReviews();
         client.end ();
     } catch (error){
@@ -227,12 +234,13 @@ async function buildDatabase (){
     }
 }
 
-// buildDatabase ();
+buildDatabase ();
 
 module.exports={
     fetchAllTrips,
     fetchTripById,
     createNewTrip,
     createInitialReviews,
-    createInitialReviews
+    createInitialUsers,
+    createNewUser
 }

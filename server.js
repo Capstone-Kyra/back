@@ -36,7 +36,7 @@ app.use(express.json());
 //   }
 //   app.use(checkIfTokenExists)
 
-const { fetchAllTrips, fetchTripById, createNewTrip, createNewUser, fetchUserByUsername } =  require("./db/seed");
+const { fetchAllTrips, fetchTripById, createNewTrip, createNewUser, fetchUserByUsername, createInitialUsers } =  require("./db/seed");
 
 async function getAllTrips(req, res, next){
   try{
