@@ -18,6 +18,25 @@ async function createReview(content, score, user_id, trips_id) {
   }
 }
 
+async function deleteReviewsById(tripId){
+  try{
+      const { rows } = await client.query(`
+      DELETE FROM reviews
+      WHERE 'tripID' = $1
+      RETURNING *;
+      `, [tripId])
+
+      if(rows.length){
+          return rows[0]
+      }else{
+          return 'failed to delete trip'
+      }
+  }catch(error){
+      console.error(error)
+  }
+}
+
 module.exports = {
   createReview,
+  deleteReviewsById
 };

@@ -157,6 +157,18 @@ async function registerNewUser(req, res){
 
 app.post("/api/users/register", registerNewUser)
 
+async function deleteASingleReview(req,res){
+    try{
+     console.log(req.params.id)
+     const theDeletedData = await deleteReviewById(Number(req.params.id))
+
+     res.send(theDeletedData)
+    }catch(error){
+        console.error(error)
+    }
+}
+app.delete("/api/reviews/:id", deleteASingleTrip)
+
 const client= require ("./db/index")
 client.connect ();
 
