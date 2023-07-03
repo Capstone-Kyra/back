@@ -82,15 +82,15 @@ async function createInitialUsers() {
       throw error;
     }
   }
-  async function createNewUser(userObj) {
+  async function createNewUser(username, password, email,is_Admin) {
     try {
-        console.log("I hope this works")
+        
         const { rows } = await client.query(`
             INSERT INTO users(username, password, email, "is_Admin")
             VALUES ($1, $2, $3, $4)
             RETURNING username, email, "is_Admin"; 
-        `, [userObj.username, userObj.password, userObj.email, userObj.is_Admin])
-        console.log("me too")
+        `, [username, password, email, is_Admin])
+        
         if (rows.length) {
             console.log ("I am tired")
             return rows[0];
@@ -130,6 +130,8 @@ async function createInitialReviews() {
       throw error;
     }
   }
+
+ 
 
 
 async function fetchTripById(idValue) {
@@ -234,7 +236,7 @@ async function buildDatabase (){
     }
 }
 
-buildDatabase ();
+ buildDatabase ();
 
 module.exports={
     fetchAllTrips,
