@@ -71,9 +71,9 @@ async function createInitialUsers() {
     try {
       console.log("Starting to create Users");
   
-      await createNewUser("1", "12345678", "testUser1@gmail.com", false);
-      await createNewUser("testUser2", "12345678", "testUser2@gmail.com", false);
-      await createNewUser("testAdmin1", "12345678", "testAdmin1@gmail.com", true);
+      await createNewUser({username:"1", password:"12345678", email: "testUser1@gmail.com", is_Admin: false});
+      await createNewUser({username: "testUser2", password: "12345678", email: "testUser2@gmail.com", is_Admin: false});
+      await createNewUser({username: "testAdmin1", password: "12345678", email: "testAdmin1@gmail.com", is_Admin: true});
   
       const allUsers = await getAllUsers();
       console.log("allUsers: ", allUsers);
@@ -82,7 +82,7 @@ async function createInitialUsers() {
       throw error;
     }
   }
-  async function createNewUser(username, password, email,is_Admin) {
+  async function createNewUser({username, password, email,is_Admin}) {
     try {
         
         const { rows } = await client.query(`

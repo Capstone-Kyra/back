@@ -131,23 +131,31 @@ app.post("/trips1", postNewTrip)
 
 async function registerNewUser(req, res){
     try{
+        console.log("1")
         const newUserData= req.body
-        const mySecret= process.env.JWT_SECRET;
+        console.log("2")
+        console.log ("3")
         console.log(req.body)
+        console.log(process.env.JWT_SECRET)
 
-        const newJWTToken= await jwt.sign(req.body, process.env.JWT_SECRET, {
+        const newJWTToken= await jwt.sign(req.body, `${process.env.JWT_SECRET}`, {
             expiresIn: "1w"
         })
+        console.log("4")
 
         if (newJWTToken){
+            console.log("5")
             const newUserForDb= await createNewUser (req.body);
-
+            console.log("6")
             if (newUserForDb){
+                console.log("7")
                 res.send({userData: newUserForDb, token: newJWTToken}).status (200)
             } else {
+                console.log("8")
                 res.send({error: true, message: "Failed to create user"}).status (403)
             }
         } else{
+            console.log("9")
             res.send({error: true, message: "Failed to create valid auth token"})
         }
     } catch (error){
