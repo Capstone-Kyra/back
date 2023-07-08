@@ -12,7 +12,6 @@ async function createTables (){
                 type VARCHAR (255) NOT NULL,
                 description TEXT
             );`);
-            console.log("Hey just finished making this trips table")
 
             await client.query(`
             CREATE TABLE users (
@@ -22,18 +21,24 @@ async function createTables (){
             email VARCHAR(255) UNIQUE NOT NULL,
             "is_Admin" BOOLEAN DEFAULT false
             );`);
-            console.log("Hey just finished making this users table")
 
             await client.query(`
             CREATE TABLE reviews (
-              id SERIAL PRIMARY KEY,
-              content VARCHAR(255) NOT NULL,
-              score INTEGER NOT NULL,
-              user_id INTEGER REFERENCES users(id),
-              trips_id INTEGER REFERENCES trips1(id)
+              "reviewId" SERIAL PRIMARY KEY,
+              description VARCHAR(255) NOT NULL,
+              rating INTEGER NOT NULL,
+              "userId" INTEGER REFERENCES users(id),
+              "tripId" INTEGER REFERENCES trips1(id)
       
       );`);
-      console.log("Hey just finished making this reviews table")
+            await client.query (`
+            CREATE TABLE comments (
+                id SERIAL PRIMARY KEY,
+                text VARCHAR (255) NOT NULL,
+                username VARCHAR (255) NOT NULL,
+                user_id INTEGER REFERENCES users(id),
+                reviews_id INTEGER REFERENCES reviews(reviews_id)
+            );`);
       console.log('finishing tables')
     } catch (error){
         console.log(error);
@@ -44,6 +49,7 @@ async function destroyTables (){
     try{
         await client.query (`
             
+            DROP TABLE IF EXISTS comments;
             DROP TABLE IF EXISTS reviews;
             DROP TABLE IF EXISTS users;
             DROP TABLE IF EXISTS trips1;
@@ -131,9 +137,6 @@ async function createInitialReviews() {
     }
   }
 
- 
-
-
 async function fetchTripById(idValue) {
     try {
         const { rows } = await client.query(`
@@ -193,6 +196,29 @@ async function deleteTripById(tripId){
     }
 }
 
+async function createComments (comments){
+    try{
+        const {rows}= await client.query(
+            `INSERT INTO comments(text, username, "user_id", "trips_id"
+            VALUES($1, $2, $3, $4)
+            RETURNING *`,
+            [comments.text, comments.username, comments.user_id, comments.trips_id]
+        );
+        return rows[0]
+    }catch(error){
+    console.log(error);
+    }
+}
+
+async function fetchComments (){
+    try{
+        const {rows} = await client.query(`SELECT * FROM comments`)
+        return rows;
+    } catch(error){
+        console.log(error);
+    }
+}
+
 async function buildDatabase (){
     try {
         client.connect ();
@@ -244,5 +270,8 @@ module.exports={
     createNewTrip,
     createInitialReviews,
     createInitialUsers,
-    createNewUser
+    createNewUser,
+    fetchUserByUsername,
+    createComments,
+    fetchComments
 }
