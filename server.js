@@ -6,6 +6,8 @@ const express= require ("express");
 
 const app= express ();
 
+const bcrypt = require("bcrypt");
+
 const cors = require("cors");
 app.use(cors());
 
@@ -20,23 +22,14 @@ app.use(myFirstMiddleware)
 app.use(express.json());
 
 
+const { fetchAllTrips, 
+    fetchTripById, 
+    createNewTrip, 
+    createNewUser, 
+    viewLoginUser, 
+    fetchUserByUsername, 
+    createInitialUsers } =  require("./db/seed");
 
-// async function checkIfTokenExists(req, res, next) {
-//       try {
-//           console.log(req.headers)
-  
-//           if (req.headers.Authorization.length) {
-//               console.log("User is valid");
-//           } else {
-//               console.log("Error. User is not valid.");
-//           }
-//       } catch (error) {
-//           console.log(error); 
-//       }
-//   }
-//   app.use(checkIfTokenExists)
-
-const { fetchAllTrips, fetchTripById, createNewTrip, createNewUser, fetchUserByUsername, createInitialUsers } =  require("./db/seed");
 
 async function getAllTrips(req, res, next){
   try{
@@ -131,31 +124,30 @@ app.post("/trips1", postNewTrip)
 
 async function registerNewUser(req, res){
     try{
-        console.log("1")
         const newUserData= req.body
-        console.log("2")
-        console.log ("3")
         console.log(req.body)
         console.log(process.env.JWT_SECRET)
-
+        const saltvalue= await bcrypt.genSalt(12)
+        const hashpassword= await bcrypt.hash(req.body.password, saltvalue)
         const newJWTToken= await jwt.sign(req.body, `${process.env.JWT_SECRET}`, {
             expiresIn: "1w"
         })
-        console.log("4")
 
         if (newJWTToken){
-            console.log("5")
-            const newUserForDb= await createNewUser (req.body);
-            console.log("6")
+            const userObj= {
+                username: req.body.username,
+                password: hashpassword,
+                email: req.body.email,
+                is_Admin: req.body.is_Admin
+            }
+            const newUserForDb= await createNewUser (userObj);
+            
             if (newUserForDb){
-                console.log("7")
                 res.send({userData: newUserForDb, token: newJWTToken}).status (200)
             } else {
-                console.log("8")
                 res.send({error: true, message: "Failed to create user"}).status (403)
             }
         } else{
-            console.log("9")
             res.send({error: true, message: "Failed to create valid auth token"})
         }
     } catch (error){
@@ -164,6 +156,53 @@ async function registerNewUser(req, res){
 }
 
 app.post("/api/users/register", registerNewUser)
+
+app.post("/api/users/login", async (req,res)=>{
+    try{
+        const {username, password}= req.body;
+
+        if(!username.length || !password.length){
+            res.send({
+                error: true,
+                message: "You failed to provide either a username or password text.",
+                data: null
+            })
+        } else{
+            const userFromDb= await fetchUserByUsername (username)
+
+            if(userFromDb && bcrypt.compare(password, userFromDb.password)){
+                const token= await jwt.sign ({
+                    username: userFromDb.username,
+                    admin: userFromDb.admin
+                }, process.env.JWT_SECRET, {
+                    expiresIn: "1w"
+                })
+
+                if (token){
+                    res.send({
+                        error: false,
+                        data: token,
+                        message: "Thanks for logging in!"
+                    }).status (200)
+                } else{
+                    res.send({
+                        error: true,
+                        data: null,
+                        message: "Failed to log in!"
+                    }).status (401)
+                }
+            } else{
+                res.send({
+                    error: true,
+                    data: null,
+                    message: "No user exists by that username."
+                }).status (401)
+            }
+        }
+    } catch (error){
+        console.error(error);
+    }
+}) 
 
 async function deleteASingleReview(req,res){
     try{
