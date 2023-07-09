@@ -26,7 +26,6 @@ const { fetchAllTrips,
     fetchTripById, 
     createNewTrip, 
     createNewUser, 
-    viewLoginUser, 
     fetchUserByUsername, 
     createInitialUsers } =  require("./db/seed");
 
