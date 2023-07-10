@@ -27,8 +27,8 @@ async function createTables (){
               "reviewId" SERIAL PRIMARY KEY,
               description VARCHAR(255) NOT NULL,
               rating INTEGER NOT NULL,
-              "reviewerId" INTEGER REFERENCES users("userId"),
-              "idOfTrip" INTEGER REFERENCES trips1("tripId")
+              "userId" INTEGER REFERENCES users("userId"),
+              "tripId" INTEGER REFERENCES trips1("tripId")
       
       );`);
             await client.query (`
@@ -36,8 +36,8 @@ async function createTables (){
                 "commentId" SERIAL PRIMARY KEY,
                 text VARCHAR (255) NOT NULL,
                 username VARCHAR (255) NOT NULL,
-                "userId" INTEGER REFERENCES users("userId"),
-                "reviewId" INTEGER REFERENCES reviews("reviewId")
+                "user_Id" INTEGER REFERENCES users("userId"),
+                "review_Id" INTEGER REFERENCES reviews("reviewId")
             );`);
     } catch (error){
         console.log(error);
@@ -57,7 +57,7 @@ async function destroyTables (){
         console.log(error);
     }
 }
-
+// Trip Section
 async function createNewTrip (newTripObj){
     try{
         const {rows}= await client.query (`
@@ -71,69 +71,6 @@ async function createNewTrip (newTripObj){
         console.log(error);
     }
 }
-
-async function createInitialUsers() {
-    try {
-      console.log("Starting to create Users");
-  
-      await createNewUser({username:"1", password:"12345678", email: "testUser1@gmail.com", is_Admin: false});
-      await createNewUser({username: "testUser2", password: "12345678", email: "testUser2@gmail.com", is_Admin: false});
-      await createNewUser({username: "testAdmin1", password: "12345678", email: "testAdmin1@gmail.com", is_Admin: true});
-  
-      const allUsers = await getAllUsers();
-      console.log("allUsers: ", allUsers);
-      console.log("Finished creating Users");
-    } catch (error) {
-      throw error;
-    }
-  }
-  async function createNewUser({username, password, email,is_Admin}) {
-    try {
-        
-        const { rows } = await client.query(`
-            INSERT INTO users(username, password, email, "is_Admin")
-            VALUES ($1, $2, $3, $4)
-            RETURNING username, email, "is_Admin"; 
-        `, [username, password, email, is_Admin])
-        
-        if (rows.length) {
-            return rows[0];
-        }
-    } catch (error) {
-        console.log(error); 
-    }
-};
-
-async function fetchUserByUsername(username) {
-    try {
-        const { rows } = await client.query(`
-            SELECT * FROM users
-            WHERE username = $1;
-        `, [username])
-
-        if (rows.length) {
-            return rows[0]; 
-        }
-    } catch (error) {
-        console.log(error); 
-    }
-}
-
-async function createInitialReviews() {
-    try {
-      console.log("Starting to create Reviews");
-  
-      const review1 = await createReview("this is great!!!", 10, 1, 3);
-      const review2 = await createReview("this is terrible!!!", 10, 1, 2);
-  
-      console.log(review1);
-      console.log(review2);
-  
-      console.log("Finished creating Reviews");
-    } catch (error) {
-      throw error;
-    }
-  }
 
 async function fetchTripById(idValue) {
     try {
@@ -194,13 +131,62 @@ async function deleteTripById(tripId){
     }
 }
 
+// Users Section
+async function createInitialUsers() {
+    try {
+      console.log("Starting to create Users");
+  
+      await createNewUser({username:"1", password:"12345678", email: "testUser1@gmail.com", is_Admin: false});
+      await createNewUser({username: "testUser2", password: "12345678", email: "testUser2@gmail.com", is_Admin: false});
+      await createNewUser({username: "testAdmin1", password: "12345678", email: "testAdmin1@gmail.com", is_Admin: true});
+  
+      const allUsers = await getAllUsers();
+      console.log("allUsers: ", allUsers);
+      console.log("Finished creating Users");
+    } catch (error) {
+      throw error;
+    }
+  }
+  async function createNewUser({username, password, email,is_Admin}) {
+    try {
+        
+        const { rows } = await client.query(`
+            INSERT INTO users(username, password, email, "is_Admin")
+            VALUES ($1, $2, $3, $4)
+            RETURNING username, email, "is_Admin"; 
+        `, [username, password, email, is_Admin])
+        
+        if (rows.length) {
+            return rows[0];
+        }
+    } catch (error) {
+        console.log(error); 
+    }
+};
+
+async function fetchUserByUsername(username) {
+    try {
+        const { rows } = await client.query(`
+            SELECT * FROM users
+            WHERE username = $1;
+        `, [username])
+
+        if (rows.length) {
+            return rows[0]; 
+        }
+    } catch (error) {
+        console.log(error); 
+    }
+}
+
+// Comment Section
 async function createComments (comments){
     try{
         const {rows}= await client.query(
-            `INSERT INTO comments(text, username, "user_id", "trips_id"
+            `INSERT INTO comments(text, username, "user_Id", "review_Id")
             VALUES($1, $2, $3, $4)
             RETURNING *`,
-            [comments.text, comments.username, comments.user_id, comments.trips_id]
+            [comments.text, comments.username, comments.user_Id, comments.review_Id]
         );
         return rows[0]
     }catch(error){
@@ -210,12 +196,65 @@ async function createComments (comments){
 
 async function fetchComments (){
     try{
+        console.log("1")
         const {rows} = await client.query(`SELECT * FROM comments`)
+        console.log("2")
         return rows;
     } catch(error){
         console.log(error);
     }
 }
+async function fetchCommentByUserId (idValue){
+    try{
+        let userId= Number(idValue)
+        const {rows} = await client.query(`
+        SELECT * FROM comments
+        INNER JOIN users ON comments.'user_Id'=users.'userId'
+        WHERE 'user_Id'= $1
+        `,
+        [userId]
+        );
+        console.low(rows);
+    } catch(error){
+        console.log(error);
+    }
+}
+
+async function deleteCommentById(commentId){
+    try{
+        const { rows } = await client.query(`
+        DELETE FROM comments
+        WHERE 'commentId' = $1
+        RETURNING *;
+        `, [commentId])
+
+        if(rows.length){
+            return rows[0]
+        }else{
+            return 'failed to delete comment'
+        }
+    }catch(error){
+        console.error(error)
+    }
+}
+
+// Reviews Section
+
+async function createInitialReviews() {
+    try {
+      console.log("Starting to create Reviews");
+  
+      const review1 = await createReview("this is great!!!", 10, 1, 3);
+      const review2 = await createReview("this is terrible!!!", 10, 1, 2);
+  
+      console.log(review1);
+      console.log(review2);
+  
+      console.log("Finished creating Reviews");
+    } catch (error) {
+      throw error;
+    }
+  }
 
 async function buildDatabase (){
     try {
@@ -229,30 +268,39 @@ async function buildDatabase (){
             type: "business",
             description: "traveling to IBM world headquarters building to get a consultation on a technology service needed"
         });
-        // console.log (firstNewTrip)
 
         const secondNewTrip= await createNewTrip ({
             location: "Florida",
             type: "family",
             description: "traveling to DisneyWorld with family to experience the magic of Disney"
         });
-        // console.log (secondNewTrip)
 
         const thirdNewTrip= await createNewTrip ({
             location: "Alaska",
             type: "tour",
             description: "taking a 7 day active adventure tour near Anchorage"
         });
-        // console.log(thirdNewTrip)
+
+        const testCommentOne= await createComments({
+            "text": "It's great!",
+            "username": "cristina",
+            "userId": 1,
+            "tripId": 1
+        });
+
+        const testCommentTwo= await createComments({
+            "text": "It's a terrible trip. Don't go!",
+            "username": "anthony",
+            "userId": 2,
+            "tripId": 2
+        });
 
         const allTrips= await fetchAllTrips();
         console.log ('all trips:' , allTrips)
 
         const findSpecificTrip = await fetchTripById(1);
         console.log(findSpecificTrip)
-        console.log("hi")
         await createInitialUsers();
-        console.log("hiiii")
         await createInitialReviews();
         client.end ();
     } catch (error){
@@ -273,5 +321,7 @@ module.exports={
     createNewUser,
     fetchUserByUsername,
     createComments,
-    fetchComments
+    fetchComments,
+    fetchCommentByUserId,
+    deleteCommentById
 }
