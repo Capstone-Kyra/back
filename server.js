@@ -27,9 +27,12 @@ const { fetchAllTrips,
     createNewTrip, 
     createNewUser, 
     fetchUserByUsername, 
-    createInitialUsers } =  require("./db/seed");
+    createInitialUsers, 
+    createComments,
+    fetchComments,
+    fetchCommentByUserId} =  require("./db/seed");
 
-
+// Trip Section
 async function getAllTrips(req, res, next){
   try{
   const actualTripData = await fetchAllTrips();
@@ -121,6 +124,8 @@ async function postNewTrip (req, res){
 }
 app.post("/trips1", postNewTrip)
 
+// User Section
+
 async function registerNewUser(req, res){
     try{
         const newUserData= req.body
@@ -203,6 +208,83 @@ app.post("/api/users/login", async (req,res)=>{
     }
 }) 
 
+// Comment section
+
+async function getAllComments(req, res, next){
+    try{
+    const actualCommentData = await fetchComments();
+    if(actualCommentData.length){
+        res.send(actualCommentData)
+        console.log("1")
+    }else{
+        res.send("no comments rendered..")
+        console.log("2")
+    }
+    }catch(error){
+        console.error(error)
+        console.log("3")
+    }
+  }
+  app.get("/api/comments", getAllComments)
+
+  async function getCommentById(req, res, next){
+    try{
+      console.log(req.params.user_Id)
+
+      const mySpecificComment = await fetchCommentByUserId(Number(req.params.user_Id))
+
+      res.send(mySpecificComment)
+    }catch(error){
+        console.error(error)
+    }
+}
+app.get("/api/comments/:user_Id", getCommentById)
+
+
+async function postNewComment (req, res, next){
+    try{
+        const myAuthToken= req.headers.authorization.slice(7)
+        const auth= jwt.verify(myAuthToken, process.env.JWT_SECRET)
+        if(auth){
+            const userFromDb= await fetchUserByUsername (auth.username)
+            if(userFromDb){
+                const response= await createComments(req.body)
+                console.log(response)
+                res.send(response)
+            } else{
+                res.send({error: true, message: "You need to have an account before being able to comment."})
+            }
+        }   else{
+            res.send({error: true, message: "Failed to create comment. Try again."})
+        }
+    } catch(error){
+        console.log(error)
+    }
+}
+app.post("/api/comments", postNewComment)
+
+async function deleteComment (req, res){
+    try{
+        const myAuthToken= req.headers.authorization.slice(7)
+        const auth= jwt.verify(myAuthToken, process.env.JWT_SECRET)
+        if(auth){
+            const userFromDb= await fetchUserByUsername (auth.username)
+            if(userFromDb){
+                const response= await deleteCommentById(Number(req.params.id))
+                res.send({response, message: "Comment deleted"})
+            } else{
+                res.send ({error: true, message: "Failed to delete comment."})
+            }
+        } else{
+            res.send ({error: true, message: "Failed to decrypt token."})
+        }
+    } catch (error){
+        console.log(error)
+    }
+}
+app.delete("/api/comments/:id", deleteComment)
+
+// Reviews Section
 async function deleteASingleReview(req,res){
     try{
      console.log(req.params.id)
@@ -213,7 +295,7 @@ async function deleteASingleReview(req,res){
         console.error(error)
     }
 }
-app.delete("/api/reviews/:id", deleteASingleTrip)
+app.delete("/api/reviews/:id", deleteASingleReview)
 
 const client= require ("./db/index")
 client.connect ();
