@@ -36,8 +36,8 @@ async function createTables (){
                 "commentId" SERIAL PRIMARY KEY,
                 text VARCHAR (255) NOT NULL,
                 username VARCHAR (255) NOT NULL,
-                "user_Id" INTEGER REFERENCES users("userId"),
-                "review_Id" INTEGER REFERENCES reviews("reviewId")
+                "userId" INTEGER REFERENCES users("userId"),
+                "reviewId" INTEGER REFERENCES reviews("reviewId")
             );`);
     } catch (error){
         console.log(error);
@@ -180,23 +180,41 @@ async function fetchUserByUsername(username) {
 }
 
 // Comment Section
-async function createComments (comments){
-    try{
-        const {rows}= await client.query(
-            `INSERT INTO comments(text, username, "user_Id", "review_Id")
-            VALUES($1, $2, $3, $4)
-            RETURNING *`,
-            [comments.text, comments.username, comments.user_Id, comments.review_Id]
-        );
-        return rows[0]
-    }catch(error){
-    console.log(error);
+// async function createComments (comments){
+//     try{
+//         const {rows}= await client.query(
+//             `INSERT INTO comments(text, username, "user_Id", "review_Id")
+//             VALUES($1, $2, $3, $4)
+//             RETURNING *`,
+//             [comments.text, comments.username, comments.userId, comments.reviewId]
+//         );
+//         return rows[0]
+//     }catch(error){
+//     console.log(error);
+//     }
+// }
+
+async function createComments(text, username, userId, reviewId ) {
+    try {
+      
+      const data = await client.query(
+        `
+      INSERT INTO comments(text, username, "userId", "reviewId")
+      VALUES($1, $2, $3, $4)
+      RETURNING *
+      `,
+        [text, username, userId, reviewId]
+      );
+  
+      return data.rows[0];
+    } catch (error) {
+      throw error;
     }
-}
+  }
 
 async function fetchComments (){
     try{
-        console.log("1")
+        
         const {rows} = await client.query(`SELECT * FROM comments`)
         console.log("2")
         return rows;
@@ -256,6 +274,23 @@ async function createInitialReviews() {
     }
   }
 
+  async function createInitialComments() {
+    try {
+      console.log("Starting to create Comments");
+  
+      const testCommentOne= await createComments("this is great!!!", "cristina", 1, 1);
+
+      const testCommentTwo= await createComments("this is terrible!!!", "anthony", 2, 2);
+  
+      console.log(testCommentOne);
+      console.log(testCommentTwo);
+  
+      console.log("Finished creating Comments");
+    } catch (error) {
+      throw error;
+    }
+  }
+
 async function buildDatabase (){
     try {
         client.connect ();
@@ -281,19 +316,7 @@ async function buildDatabase (){
             description: "taking a 7 day active adventure tour near Anchorage"
         });
 
-        const testCommentOne= await createComments({
-            "text": "It's great!",
-            "username": "cristina",
-            "userId": 1,
-            "tripId": 1
-        });
-
-        const testCommentTwo= await createComments({
-            "text": "It's a terrible trip. Don't go!",
-            "username": "anthony",
-            "userId": 2,
-            "tripId": 2
-        });
+       
 
         const allTrips= await fetchAllTrips();
         console.log ('all trips:' , allTrips)
@@ -302,6 +325,7 @@ async function buildDatabase (){
         console.log(findSpecificTrip)
         await createInitialUsers();
         await createInitialReviews();
+        await createInitialComments();
         client.end ();
     } catch (error){
         console.log(error);
@@ -318,6 +342,7 @@ module.exports={
     createNewTrip,
     createInitialReviews,
     createInitialUsers,
+    createInitialComments,
     createNewUser,
     fetchUserByUsername,
     createComments,
