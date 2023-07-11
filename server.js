@@ -30,7 +30,14 @@ const { fetchAllTrips,
     createInitialUsers, 
     createComments,
     fetchComments,
-    fetchCommentByUserId} =  require("./db/seed");
+    fetchCommentByUserId,
+    deleteCommentById,
+    deleteReviewById,
+    createNewReview,
+    updateReviewById,
+    createInitialReviews,
+fetchReviewById,
+fetchReviews} =  require("./db/seed");
 
 // Trip Section
 async function getAllTrips(req, res, next){
@@ -285,6 +292,57 @@ async function deleteComment (req, res){
 app.delete("/api/comments/:id", deleteComment)
 
 // Reviews Section
+
+async function postNewReview (req, res, next){
+    try{
+        const myAuthToken= req.headers.authorization.slice(7)
+        const auth= jwt.verify(myAuthToken, process.env.JWT_SECRET)
+        if(auth){
+            const userFromDb= await fetchUserByUsername (auth.username)
+            if(userFromDb){
+                const response= await createNewReview(req.body)
+                console.log(response)
+                res.send(response)
+            } else{
+                res.send({error: true, message: "You need to have an account before being able to create a review."})
+            }
+        }   else{
+            res.send({error: true, message: "Failed to create review. Try again."})
+        }
+    } catch(error){
+        console.log(error)
+    }
+}
+app.post("/api/reviews", postNewReview)
+
+async function getAllReviews(req, res, next){
+    try{
+    const actualReviewData = await fetchReviews();
+    console.log(actualReviewData)
+    if(actualReviewData.length){
+        res.send(actualReviewData)
+    }else{
+        res.send('no reviews rendered')
+    }
+    }catch(error){
+        console.error(error)
+    }
+  }
+  app.get("/api/reviews", getAllReviews)
+
+  async function getReviewById(req, res, next){
+    try{
+      console.log(req.params.id)
+
+      const mySpecificReview = await fetchReviewById(Number(req.params.id))
+
+      res.send(mySpecificReview)
+    }catch(error){
+        console.error(error)
+    }
+}
+app.get("/api/reviews/:id", getReviewById)
+
 async function deleteASingleReview(req,res){
     try{
      console.log(req.params.id)
