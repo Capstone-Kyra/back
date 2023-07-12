@@ -256,7 +256,51 @@ async function deleteCommentById(commentId){
     }
 }
 
+async function updateCommentsById(reviewId, { rating, description}){
+    try{
+     const { rows } = await client.query(`
+     UPDATE reviews
+     SET rating = $1, description = $2
+     WHERE 'reviewId' = $3
+     RETURNING *;
+     ` [rating, description, reviewId])
+
+     if(rows.length){
+        return rows[0];
+     }
+    }catch(error){
+        console.error(error)
+    }
+}
+
 // Reviews Section
+
+
+
+  async function createNewReview ([rating,description,reviewId]){
+    try{
+        const {rows}= await client.query (`
+            INSERT INTO reviews (rating,description,reviewId)
+            VALUES ($1, $2, $3)
+            RETURNING *;
+        `, [rating,description,reviewId]);
+
+            return rows [0];
+    } catch (error){
+        console.log(error);
+    }
+}
+
+async function fetchReviews (){
+    try{
+        
+        const {rows} = await client.query(`SELECT * FROM reviews`)
+        console.log("2")
+        return rows;
+    } catch(error){
+        console.log(error);
+    }
+}
 
 async function createInitialReviews() {
     try {
@@ -273,6 +317,54 @@ async function createInitialReviews() {
       throw error;
     }
   }
+
+async function fetchReviewById(idValue) {
+    try {
+        const { rows } = await client.query(`
+            SELECT * FROM reviews
+            WHERE "reviewId" = ${idValue};
+        `)
+
+        return rows[0];
+    } catch (error) {
+        console.log(error); 
+    }
+}
+
+  async function deleteReviewById(reviewId){
+    try{
+        const { rows } = await client.query(`
+        DELETE FROM reviews
+        WHERE 'reviewId' = $1
+        RETURNING *;
+        `, [reviewId])
+
+        if(rows.length){
+            return rows[0]
+        }else{
+            return 'failed to delete review'
+        }
+    }catch(error){
+        console.error(error)
+    }
+}
+
+async function updateReviewById(reviewId, { rating, description}){
+    try{
+     const { rows } = await client.query(`
+     UPDATE reviews
+     SET rating = $1, description = $2
+     WHERE 'reviewId' = $3
+     RETURNING *;
+     ` [rating, description, reviewId])
+
+     if(rows.length){
+        return rows[0];
+     }
+    }catch(error){
+        console.error(error)
+    }
+}
 
   async function createInitialComments() {
     try {
@@ -332,7 +424,7 @@ async function buildDatabase (){
     }
 }
 
-//  buildDatabase ();
+//    buildDatabase ();
 
 module.exports={
     fetchAllTrips,
@@ -348,5 +440,10 @@ module.exports={
     createComments,
     fetchComments,
     fetchCommentByUserId,
-    deleteCommentById
+    deleteCommentById,
+    deleteReviewById,
+    createNewReview,
+    updateReviewById,
+    fetchReviewById,
+    fetchReviews
 }
