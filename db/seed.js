@@ -283,7 +283,7 @@ async function createInitialReviews() {
       const testCommentTwo= await createComments("this is terrible!!!", "anthony", 2, 2);
   
       console.log(testCommentOne);
-      console.log(testCommentTwo);
+    //   console.log(testCommentTwo);
   
       console.log("Finished creating Comments");
     } catch (error) {
