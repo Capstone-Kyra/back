@@ -177,7 +177,7 @@ app.post("/api/users/login", async (req,res)=>{
             if(userFromDb && bcrypt.compare(password, userFromDb.password)){
                 const token= await jwt.sign ({
                     username: userFromDb.username,
-                    admin: userFromDb.admin
+                    admin: userFromDb.is_Admin
                 }, process.env.JWT_SECRET, {
                     expiresIn: "1w"
                 })
