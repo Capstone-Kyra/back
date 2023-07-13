@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "seed": "nodemon db/seed.js",
+    "seed": "node db/seed.js",
+    "start": "node server.js",
+    "seed-dev": "nodemon db/seed.js",
     "dev": "nodemon server.js"
   },
   "keywords": [],

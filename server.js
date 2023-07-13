@@ -11,7 +11,8 @@ const bcrypt = require("bcrypt");
 const cors = require("cors");
 app.use(cors());
 
-
+const morgan = require('morgan');
+app.use(morgan('dev'));
 function myFirstMiddleware(req, res, next) {
   console.log("We have received a request")
   console.log("Now we will respond")
@@ -37,7 +38,7 @@ const { fetchAllTrips,
     updateReviewById,
     createInitialReviews,
 fetchReviewById,
-fetchReviews} =  require("./db/seed");
+fetchReviews} =  require("./db/seedData");
 
 // Trip Section
 async function getAllTrips(req, res, next){
@@ -106,9 +107,10 @@ async function postNewTrip(req, res, next){
 
 async function postNewTrip (req, res){
     try{
+        console.log('hello');
         const myAuthToken= req.headers.authorization.slice (7);
         console.log("my actual token", myAuthToken)
-
+     console.log(req.body, 'req.body')
         const isThisTokenLegit= jwt.verify (myAuthToken, process.env.JWT_SECRET)
         console.log ("This is my decrypted token:")
         console.log(isThisTokenLegit)
@@ -129,7 +131,7 @@ async function postNewTrip (req, res){
         console.log (error)
     }
 }
-app.post("/trips1", postNewTrip)
+app.post("/api/trips1", postNewTrip)
 
 // User Section
 
@@ -143,7 +145,10 @@ async function registerNewUser(req, res){
         const newJWTToken= await jwt.sign(req.body, `${process.env.JWT_SECRET}`, {
             expiresIn: "1w"
         })
+         if(req.body.is_Admin !== false && req.body.is_Admin !== true){
+            req.body.is_Admin = false
 
+         }
         if (newJWTToken){
             const userObj= {
                 username: req.body.username,
@@ -356,7 +361,7 @@ async function deleteASingleReview(req,res){
 app.delete("/api/reviews/:id", deleteASingleReview)
 
 const client= require ("./db/index")
-client.connect ();
+  client.connect();
 
 app.listen (3000, () => {
   console.log ("We are now connected to port 3000.")
