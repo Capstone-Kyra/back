@@ -11,7 +11,8 @@ const bcrypt = require("bcrypt");
 const cors = require("cors");
 app.use(cors());
 
-
+const morgan = require('morgan');
+app.use(morgan('dev'));
 function myFirstMiddleware(req, res, next) {
   console.log("We have received a request")
   console.log("Now we will respond")
@@ -30,7 +31,14 @@ const { fetchAllTrips,
     createInitialUsers, 
     createComments,
     fetchComments,
-    fetchCommentByUserId} =  require("./db/seed");
+    fetchCommentByUserId,
+    deleteCommentById,
+    deleteReviewById,
+    createNewReview,
+    updateReviewById,
+    createInitialReviews,
+fetchReviewById,
+fetchReviews} =  require("./db/seedData");
 
 // Trip Section
 async function getAllTrips(req, res, next){
@@ -99,9 +107,10 @@ async function postNewTrip(req, res, next){
 
 async function postNewTrip (req, res){
     try{
+        console.log('hello');
         const myAuthToken= req.headers.authorization.slice (7);
         console.log("my actual token", myAuthToken)
-
+     console.log(req.body, 'req.body')
         const isThisTokenLegit= jwt.verify (myAuthToken, process.env.JWT_SECRET)
         console.log ("This is my decrypted token:")
         console.log(isThisTokenLegit)
@@ -122,7 +131,7 @@ async function postNewTrip (req, res){
         console.log (error)
     }
 }
-app.post("/trips1", postNewTrip)
+app.post("/api/trips1", postNewTrip)
 
 // User Section
 
@@ -136,7 +145,10 @@ async function registerNewUser(req, res){
         const newJWTToken= await jwt.sign(req.body, `${process.env.JWT_SECRET}`, {
             expiresIn: "1w"
         })
+         if(req.body.is_Admin !== false && req.body.is_Admin !== true){
+            req.body.is_Admin = false
 
+         }
         if (newJWTToken){
             const userObj= {
                 username: req.body.username,
@@ -285,6 +297,57 @@ async function deleteComment (req, res){
 app.delete("/api/comments/:id", deleteComment)
 
 // Reviews Section
+
+async function postNewReview (req, res, next){
+    try{
+        const myAuthToken= req.headers.authorization.slice(7)
+        const auth= jwt.verify(myAuthToken, process.env.JWT_SECRET)
+        if(auth){
+            const userFromDb= await fetchUserByUsername (auth.username)
+            if(userFromDb){
+                const response= await createNewReview(req.body)
+                console.log(response)
+                res.send(response)
+            } else{
+                res.send({error: true, message: "You need to have an account before being able to create a review."})
+            }
+        }   else{
+            res.send({error: true, message: "Failed to create review. Try again."})
+        }
+    } catch(error){
+        console.log(error)
+    }
+}
+app.post("/api/reviews", postNewReview)
+
+async function getAllReviews(req, res, next){
+    try{
+    const actualReviewData = await fetchReviews();
+    console.log(actualReviewData)
+    if(actualReviewData.length){
+        res.send(actualReviewData)
+    }else{
+        res.send('no reviews rendered')
+    }
+    }catch(error){
+        console.error(error)
+    }
+  }
+  app.get("/api/reviews", getAllReviews)
+
+  async function getReviewById(req, res, next){
+    try{
+      console.log(req.params.id)
+
+      const mySpecificReview = await fetchReviewById(Number(req.params.id))
+
+      res.send(mySpecificReview)
+    }catch(error){
+        console.error(error)
+    }
+}
+app.get("/api/reviews/:id", getReviewById)
+
 async function deleteASingleReview(req,res){
     try{
      console.log(req.params.id)
@@ -298,7 +361,7 @@ async function deleteASingleReview(req,res){
 app.delete("/api/reviews/:id", deleteASingleReview)
 
 const client= require ("./db/index")
-client.connect ();
+  client.connect();
 
 app.listen (3000, () => {
   console.log ("We are now connected to port 3000.")
