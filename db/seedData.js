@@ -27,6 +27,7 @@ async function createTables (){
               "reviewId" SERIAL PRIMARY KEY,
               description VARCHAR(255) NOT NULL,
               rating INTEGER NOT NULL,
+              location VARCHAR(255) NOT NULL,
               "userId" INTEGER REFERENCES users("userId"),
               "tripId" INTEGER REFERENCES trips1("tripId")
       
@@ -305,13 +306,13 @@ async function updateCommentsById(reviewId, { rating, description}){
 
 
 
-  async function createNewReview ([rating,description,reviewId]){
+  async function createNewReview ([rating,description,location,reviewId]){
     try{
         const {rows}= await client.query (`
-            INSERT INTO reviews (rating,description,reviewId)
-            VALUES ($1, $2, $3)
+            INSERT INTO reviews (rating,description,location,reviewId)
+            VALUES ($1, $2, $3, $4)
             RETURNING *;
-        `, [rating,description,reviewId]);
+        `, [rating,description,location,reviewId]);
 
             return rows [0];
     } catch (error){
@@ -330,15 +331,32 @@ async function fetchReviews (){
     }
 }
 
+async function fetchReviewByTripId (idValue){
+    try{
+        let tripId= Number(idValue)
+        const {rows} = await client.query(`
+        SELECT * FROM reviews
+        
+        WHERE 'trip_Id'= $1
+        `,
+        [tripId]
+        );
+        console.log(rows);
+    } catch(error){
+        console.log(error);
+    }
+}
+
+
 async function createInitialReviews() {
     try {
-      console.log("Starting to create Reviews");
+      console.log("Starting to create Reviews"); 
   
-      const review1 = await createReview("this is great!!!", 10, 1, 3);
-      const review2 = await createReview("this is terrible!!!", 10, 1, 2);
+      const review1 = await createReview("this is great!!!", 10, 1,3,'new york');
+      const review2 = await createReview("this is terrible!!!", 10, 1,  2, 'florida');
   
       console.log(review1);
-      console.log(review2);
+    //   console.log(review2);
   
       console.log("Finished creating Reviews");
     } catch (error) {
@@ -476,5 +494,6 @@ module.exports={
     fetchReviews,
     fetchUserByUserId,
     fetchAllUsers,
+    fetchReviewByTripId,
     buildDatabase
 }
