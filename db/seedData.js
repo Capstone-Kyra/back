@@ -330,6 +330,23 @@ async function fetchReviews (){
     }
 }
 
+async function fetchReviewByTripId (idValue){
+    try{
+        let tripId= Number(idValue)
+        const {rows} = await client.query(`
+        SELECT * FROM reviews
+        
+        WHERE 'trip_Id'= $1
+        `,
+        [tripId]
+        );
+        console.log(rows);
+    } catch(error){
+        console.log(error);
+    }
+}
+
+
 async function createInitialReviews() {
     try {
       console.log("Starting to create Reviews");
@@ -476,5 +493,6 @@ module.exports={
     fetchReviews,
     fetchUserByUserId,
     fetchAllUsers,
+    fetchReviewByTripId,
     buildDatabase
 }

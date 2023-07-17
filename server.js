@@ -362,6 +362,19 @@ async function getAllReviews(req, res, next){
 }
 app.get("/api/reviews/:id", getReviewById)
 
+async function getReviewByTripId(req, res, next){
+    try{
+      console.log(req.params.id)
+
+      const mySpecificReview = await fetchReviewByTripId(Number(req.params.id))
+
+      res.send(mySpecificReview)
+    }catch(error){
+        console.error(error)
+    }
+}
+app.get("/api/reviews/:tripid", getReviewById)
+
 async function deleteASingleReview(req,res){
     try{
      console.log(req.params.id)
