@@ -38,7 +38,7 @@ const { fetchAllTrips,
     updateReviewById,
     createInitialReviews,
 fetchReviewById,
-fetchReviews} =  require("./db/seedData");
+fetchReviews,fetchUserByUserId, fetchAllUsers} =  require("./db/seedData");
 
 // Trip Section
 async function getAllTrips(req, res, next){
@@ -220,6 +220,20 @@ app.post("/api/users/login", async (req,res)=>{
     }
 }) 
 
+async function getAllUsers(req, res, next){
+    try{
+      
+
+      const mySpecificUser = await fetchAllUsers();
+
+      res.send(mySpecificUser)
+    }catch(error){
+        console.error(error)
+    }
+}
+app.get("/api/users", getAllUsers)
+
+
 // Comment section
 
 async function getAllComments(req, res, next){
@@ -294,7 +308,7 @@ async function deleteComment (req, res){
         console.log(error)
     }
 }
-app.delete("/api/comments/:id", deleteComment)
+app.delete("/api/comments/:reviewId", deleteComment)
 
 // Reviews Section
 

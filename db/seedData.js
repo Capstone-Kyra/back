@@ -179,6 +179,34 @@ async function fetchUserByUsername(username) {
     }
 }
 
+async function fetchUserByUserId (idValue){
+    try{
+        let userId= Number(idValue)
+        const {rows} = await client.query(`
+        SELECT * FROM users
+        
+        WHERE 'user_Id'= $1
+        `,
+        [userId]
+        );
+        console.log(rows);
+    } catch(error){
+        console.log(error);
+    }
+}
+
+async function fetchAllUsers (){
+    try{
+        const {rows}= await client.query (`
+            SELECT * FROM users;
+        `);
+        return rows;
+    }catch (error){
+        console.log(error);
+    }
+}
+
+
 // Comment Section
 // async function createComments (comments){
 //     try{
@@ -446,5 +474,7 @@ module.exports={
     updateReviewById,
     fetchReviewById,
     fetchReviews,
+    fetchUserByUserId,
+    fetchAllUsers,
     buildDatabase
 }
