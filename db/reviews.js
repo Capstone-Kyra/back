@@ -1,15 +1,15 @@
 const client = require("./index");
 
-async function createReview(description, rating, userId, tripId ) {
+async function createReview(description, rating, userId, tripId ,location) {
   try {
     
     const data = await client.query(
       `
-    INSERT INTO reviews(description, rating, "userId", "tripId")
-    VALUES($1, $2, $3, $4)
+    INSERT INTO reviews(description, rating, "userId", "tripId", location)
+    VALUES($1, $2, $3, $4, $5)
     RETURNING *
     `,
-      [description, rating, userId, tripId]
+      [description, rating, userId, tripId, location]
     );
 
     return data.rows[0];
@@ -17,6 +17,8 @@ async function createReview(description, rating, userId, tripId ) {
     throw error;
   }
 }
+
+
 
 async function deleteReviewsById(tripId){
   try{
