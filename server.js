@@ -38,7 +38,7 @@ const { fetchAllTrips,
     updateReviewById,
     createInitialReviews,
 fetchReviewById,
-fetchReviews,fetchUserByUserId, fetchAllUsers} =  require("./db/seedData");
+fetchReviews,fetchUserByUserId, fetchAllUsers,fetchReviewByTripId} =  require("./db/seedData");
 
 // Trip Section
 async function getAllTrips(req, res, next){
@@ -349,31 +349,31 @@ async function getAllReviews(req, res, next){
   }
   app.get("/api/reviews", getAllReviews)
 
-  async function getReviewById(req, res, next){
-    try{
-      console.log(req.params.id)
+//   async function getReviewById(req, res, next){
+//     try{
+//       console.log(req.params.id)
 
-      const mySpecificReview = await fetchReviewById(Number(req.params.id))
+//       const mySpecificReview = await fetchReviewByTripId(Number(req.params.id))
 
-      res.send(mySpecificReview)
-    }catch(error){
-        console.error(error)
-    }
-}
-app.get("/api/reviews/:id", getReviewById)
+//       res.send(mySpecificReview)
+//     }catch(error){
+//         console.error(error)
+//     }
+// }
+// app.get("/api/reviews/:id", getReviewById)
 
 async function getReviewByTripId(req, res, next){
     try{
-      console.log(req.params.id)
+      console.log(req.params.tripId)
 
-      const mySpecificReview = await fetchReviewByTripId(Number(req.params.id))
+      const mySpecificReview = await fetchReviewByTripId(Number(req.params.tripId))
 
       res.send(mySpecificReview)
     }catch(error){
         console.error(error)
     }
 }
-app.get("/api/reviews/:tripid", getReviewById)
+app.get("/api/reviews/:tripId", getReviewByTripId)
 
 async function deleteASingleReview(req,res){
     try{

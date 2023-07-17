@@ -102,7 +102,7 @@ async function updateTripById(tripId, {location, type, description}){
      const { rows } = await client.query(`
      UPDATE trips
      SET location = $1, type = $2, description = $3
-     WHERE 'tripId' = $4
+     WHERE "tripId" = $4
      RETURNING *;
      ` [location, type, description, tripId])
 
@@ -118,7 +118,7 @@ async function deleteTripById(tripId){
     try{
         const { rows } = await client.query(`
         DELETE FROM trips
-        WHERE 'tripId' = $1
+        WHERE "tripId" = $1
         RETURNING *;
         `, [tripId])
 
@@ -186,7 +186,7 @@ async function fetchUserByUserId (idValue){
         const {rows} = await client.query(`
         SELECT * FROM users
         
-        WHERE 'user_Id'= $1
+        WHERE "userId"= $1;
         `,
         [userId]
         );
@@ -230,7 +230,7 @@ async function createComments(text, username, userId, reviewId ) {
         `
       INSERT INTO comments(text, username, "userId", "reviewId")
       VALUES($1, $2, $3, $4)
-      RETURNING *
+      RETURNING *;
       `,
         [text, username, userId, reviewId]
       );
@@ -244,7 +244,7 @@ async function createComments(text, username, userId, reviewId ) {
 async function fetchComments (){
     try{
         
-        const {rows} = await client.query(`SELECT * FROM comments`)
+        const {rows} = await client.query(`SELECT * FROM comments;`)
         console.log("2")
         return rows;
     } catch(error){
@@ -256,8 +256,8 @@ async function fetchCommentByUserId (idValue){
         let userId= Number(idValue)
         const {rows} = await client.query(`
         SELECT * FROM comments
-        INNER JOIN users ON comments.'user_Id'=users.'userId'
-        WHERE 'user_Id'= $1
+        INNER JOIN users ON comments."user_Id"=users."userId"
+        WHERE 'user_Id'= $1;
         `,
         [userId]
         );
@@ -323,7 +323,7 @@ async function updateCommentsById(reviewId, { rating, description}){
 async function fetchReviews (){
     try{
         
-        const {rows} = await client.query(`SELECT * FROM reviews`)
+        const {rows} = await client.query(`SELECT * FROM reviews;`)
         console.log("2")
         return rows;
     } catch(error){
@@ -332,14 +332,19 @@ async function fetchReviews (){
 }
 
 async function fetchReviewByTripId (idValue){
+    console.log('this is fetch by trip id"')
     try{
         let tripId= Number(idValue)
         const {rows} = await client.query(`
-        SELECT * FROM reviews
-        
-        WHERE 'trip_Id'= $1
-        `,
-        [tripId]
+        SELECT trips1."tripId", trips1.location, trips1.type, trips1.description, reviews.rating, reviews."userId", users.username, users.email, comments."commentId" FROM trips1
+        JOIN reviews
+        ON reviews."tripId"=trips1."tripId"
+        JOIN users
+        ON reviews."userId"=users."userId"
+        JOIN comments
+        ON reviews."userId"=comments."commentId";
+        `
+       
         );
         console.log(rows);
     } catch(error){
