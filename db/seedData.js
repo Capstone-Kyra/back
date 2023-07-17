@@ -350,13 +350,13 @@ async function fetchReviewByTripId (idValue){
 
 async function createInitialReviews() {
     try {
-      console.log("Starting to create Reviews");
+      console.log("Starting to create Reviews"); 
   
       const review1 = await createReview("this is great!!!", 10, 1,3,'new york');
       const review2 = await createReview("this is terrible!!!", 10, 1,  2, 'florida');
   
       console.log(review1);
-      console.log(review2);
+    //   console.log(review2);
   
       console.log("Finished creating Reviews");
     } catch (error) {
