@@ -1,6 +1,6 @@
 const client = require("./index");
 
-async function createReview(description, rating, userId, tripId ,location) {
+async function createReview(description, rating, userId, tripId, location ) {
   try {
     
     const data = await client.query(
