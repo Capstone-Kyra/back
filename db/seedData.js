@@ -10,7 +10,8 @@ async function createTables (){
                 "tripId" SERIAL PRIMARY KEY,
                 location VARCHAR (255) NOT NULL,
                 type VARCHAR (255) NOT NULL,
-                description TEXT
+                description TEXT,
+                picture TEXT
             );`);
 
             await client.query(`
@@ -62,10 +63,10 @@ async function destroyTables (){
 async function createNewTrip (newTripObj){
     try{
         const {rows}= await client.query (`
-            INSERT INTO trips1 (location, type, description)
-            VALUES ($1, $2, $3)
+            INSERT INTO trips1 (location, type, description, picture)
+            VALUES ($1, $2, $3, $4)
             RETURNING *;
-        `, [newTripObj.location, newTripObj.type, newTripObj.description]);
+        `, [newTripObj.location, newTripObj.type, newTripObj.description, newTripObj.picture]);
 
             return rows [0];
     } catch (error){
@@ -336,16 +337,15 @@ async function fetchReviewByTripId (idValue){
     try{
         let tripId= Number(idValue)
         const {rows} = await client.query(`
-        SELECT trips1."tripId", trips1.location, trips1.type, trips1.description, reviews.rating, reviews."userId", users.username, users.email, comments."commentId" FROM trips1
+        SELECT trips1."tripId", trips1.location, trips1.picture, reviews.description, comments.text, trips1.type, trips1.description, reviews.rating, reviews."userId", users.username, users.email, comments."commentId" FROM trips1
         JOIN reviews
         ON reviews."tripId"=trips1."tripId"
         JOIN users
         ON reviews."userId"=users."userId"
         JOIN comments
         ON reviews."userId"=comments."commentId";
-        `
-       
-        );
+        ` );
+        return rows;
         console.log(rows);
     } catch(error){
         console.log(error);
@@ -444,19 +444,22 @@ async function buildDatabase (){
         const firstNewTrip= await createNewTrip ({
             location: "New York",
             type: "business",
-            description: "traveling to IBM world headquarters building to get a consultation on a technology service needed"
+            description: "traveling to IBM world headquarters building to get a consultation on a technology service needed",
+            picture: "https://i.natgeofe.com/k/5b396b5e-59e7-43a6-9448-708125549aa1/new-york-statue-of-liberty_16x9.jpg?w=1200"
         });
 
         const secondNewTrip= await createNewTrip ({
             location: "Florida",
             type: "family",
-            description: "traveling to DisneyWorld with family to experience the magic of Disney"
+            description: "traveling to DisneyWorld with family to experience the magic of Disney",
+            picture: "https://hips.hearstapps.com/hmg-prod/images/disney-world-2-1512760548.jpg"
         });
 
         const thirdNewTrip= await createNewTrip ({
             location: "Alaska",
             type: "tour",
-            description: "taking a 7 day active adventure tour near Anchorage"
+            description: "taking a 7 day active adventure tour near Anchorage",
+            picture: "https://deih43ym53wif.cloudfront.net/view-along-dalton-highway-toward-brooks-alaska-shutterstock_627939359.jpg_f3d4351402.jpg"
         });
 
        
