@@ -307,13 +307,13 @@ async function updateCommentsById(reviewId, { rating, description}){
 
 
 
-  async function createNewReview ([rating,description,location,reviewId]){
+  async function createNewReview ({rating,description,location,userId,tripId}){
     try{
         const {rows}= await client.query (`
-            INSERT INTO reviews (rating,description,location,reviewId)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO reviews (rating,description,location, "userId", "tripId")
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING *;
-        `, [rating,description,location,reviewId]);
+        `, [rating,description,location, userId, tripId]);
 
             return rows [0];
     } catch (error){

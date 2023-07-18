@@ -319,6 +319,7 @@ async function postNewReview (req, res, next){
         if(auth){
             const userFromDb= await fetchUserByUsername (auth.username)
             if(userFromDb){
+                console.log(req.body,"req.body")
                 const response= await createNewReview(req.body)
                 console.log(response)
                 res.send(response)
