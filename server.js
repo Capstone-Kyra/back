@@ -373,7 +373,7 @@ async function getReviewByTripId(req, res, next){
         console.error(error)
     }
 }
-app.get("/api/reviews/:tripId", getReviewByTripId)
+app.get("/api/reviews/trips/:tripId", getReviewByTripId)
 
 async function getReviewByUserId(req, res, next){
     try{
@@ -386,7 +386,7 @@ async function getReviewByUserId(req, res, next){
         console.error(error)
     }
 }
-app.get("/api/reviews/:userId", getReviewByUserId)
+app.get("/api/reviews/users/:userId", getReviewByUserId)
 
 async function deleteASingleReview(req,res){
     try{

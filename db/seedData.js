@@ -357,12 +357,12 @@ async function fetchReviewByUserId (idValue){
         let userId= Number(idValue)
         const {rows} = await client.query(`
         SELECT * FROM reviews
-        INNER JOIN users ON reviews."user_Id"=users."userId"
-        WHERE 'user_Id'= $1;
+        WHERE "userId"= $1;
         `,
         [userId]
         );
-        console.low(rows);
+        console.log(rows);
+        return rows;
     } catch(error){
         console.log(error);
     }
