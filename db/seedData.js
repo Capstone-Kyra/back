@@ -361,7 +361,7 @@ async function fetchReviewByUserId (idValue){
         `,
         [userId]
         );
-        console.log(rows);
+        console.log(rows, 'jhgfdstdhgvh');
         return rows;
     } catch(error){
         console.log(error);

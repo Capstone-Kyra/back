@@ -219,13 +219,24 @@ app.post("/api/users/login", async (req,res)=>{
         console.error(error);
     }
 }) 
+async function getUserInfoByUsername(req, res, next){
+    try{
+     const {username} = req.params 
+
+        const mySpecificUser = await fetchUserByUsername(username);
+        delete mySpecificUser.password
+        res.send(mySpecificUser)
+      }catch(error){
+          console.error(error)
+      }
+  }
+  app.get("/api/users/userInfo/:username", getUserInfoByUsername)
 
 async function getAllUsers(req, res, next){
     try{
       
 
       const mySpecificUser = await fetchAllUsers();
-
       res.send(mySpecificUser)
     }catch(error){
         console.error(error)
@@ -378,10 +389,10 @@ app.get("/api/reviews/trips/:tripId", getReviewByTripId)
 
 async function getReviewByUserId(req, res, next){
     try{
-      console.log(req.params.userId)
+      console.log(req.params.userId, 'kjhgf')
 
       const mySpecificUserReview = await fetchReviewByUserId(Number(req.params.userId))
-
+console.log(mySpecificUserReview, '!', '?')
       res.send(mySpecificUserReview)
     }catch(error){
         console.error(error)
