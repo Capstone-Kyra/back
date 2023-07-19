@@ -38,7 +38,7 @@ const { fetchAllTrips,
     updateReviewById,
     createInitialReviews,
 fetchReviewById,
-fetchReviews,fetchUserByUserId, fetchAllUsers,fetchReviewByTripId} =  require("./db/seedData");
+fetchReviews,fetchUserByUserId, fetchAllUsers,fetchReviewByTripId, fetchReviewByUserId} =  require("./db/seedData");
 
 // Trip Section
 async function getAllTrips(req, res, next){
