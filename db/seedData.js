@@ -362,7 +362,7 @@ async function fetchReviewByUserId (idValue){
         [userId]
         );
         console.log(rows, 'jhgfdstdhgvh');
-        return rows;
+        return rows [0];
     } catch(error){
         console.log(error);
     }
@@ -489,6 +489,7 @@ async function buildDatabase (){
         await createInitialReviews();
         await createInitialComments();
         // client.end ();
+        console.log ("finished rebuilding database")
     } catch (error){
         console.log(error);
     }
